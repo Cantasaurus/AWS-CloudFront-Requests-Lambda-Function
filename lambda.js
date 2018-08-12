@@ -62,7 +62,9 @@ var params = {
 //Transporter object for nodemailer. Service can be any smtp server but gmail
 //is extremely easy to setup if you already have an account as you can see.
 //You do have to turn on the access for less secure apps setting in your gmail
-//settings however.
+//settings however. I also had to manually accept a prompt from Google after running
+//a test of the function to accept that the AWS datacenter in VA was trying to access
+//my account. All should be good afterwards.
 var transporter = nodemailer.createTransport({
  service: 'gmail',
  auth: {
@@ -73,8 +75,14 @@ var transporter = nodemailer.createTransport({
 
 function metrics(){
   let startString = start.toUTCString();
+  let statusObj = {
+    success: true,
+    error: false,
+    date: start
+  };
   cw.getMetricData(params, (err, data) => {
     if (err) {
+      console.log(`There was an error getting the CloudFront metrics.\n${err}`);
       //Simply change the from, to, subject, and html to your liking. My needs are fairly simple.
       const mailOptions = {
         from: 'dannycanter123@gmail.com',
@@ -84,33 +92,43 @@ function metrics(){
       };
 
       //nodemailer sendMail method. Standard node callback with err first.
-      //As it's a lambda function the console logs are useless but if you want
-      //to run this as a regular script they're useful.
       transporter.sendMail(mailOptions, (err, info) => {
-         if(err)
-           console.log(err)
-         else
-           console.log(info);
+         if(err){
+           console.log(err);
+        }else{
+          console.log("Succesfully sent the email.");
+        }
       });
 
     }else{
+      console.log("CloudFront metrics were successfully retrieved.");
+      let amount = data.MetricDataResults[0].Values[0];
+      if (data.MetricDataResults[0].Values.length === 0){
+        amount = 0;
+      }
       const mailOptions = {
         from: 'dannycanter123@gmail.com',
         to: 'dannycanter123@gmail.com',
         subject: `CloudFront requests for ${startString}`,
-        html: `<p>The CloudFront requests for <i>${startString}</i> are: <b>${data.MetricDataResults[0].Values[0]}</b></p>`
+        html: `<p>The CloudFront requests for <i>${startString}</i> are: <b>${amount}</b></p>`
       };
 
       transporter.sendMail(mailOptions, (err, info) => {
          if(err){
-           console.log(err)
-         }else{
-           console.log(info);
-         }
+           console.log(err);
+        }else{
+          console.log("Successfully sent the email.");
+        }
       });
-
-    }
+     }
   });
 }
 
-metrics();
+exports.handler = (events, context, callback) => {
+  metrics();
+  //No real error handling here. Could pass a callback to metrics function to grab whether an error
+  //occurred anywhere in metrics and use it here but the logs in metrics should be enough for my use
+  //case. This is what is displayed in the logs (as well as any console logs) when the function finishes
+  //First parameter is an error object, and second is a success object.
+  callback(null, "Function finished");
+}
