@@ -1,0 +1,16 @@
+{
+  "name": "lambda",
+  "version": "1.0.0",
+  "description": "Lambda function that will send an email every night with the amount of CloudFront requests for the given day. ",
+  "main": "lambda.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node lambda.js"
+  },
+  "author": "Danny Canter",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.289.0",
+    "node-mailer": "^0.1.1"
+  }
+}
