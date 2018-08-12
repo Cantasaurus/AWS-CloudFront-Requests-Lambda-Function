@@ -75,11 +75,6 @@ var transporter = nodemailer.createTransport({
 
 function metrics(){
   let startString = start.toUTCString();
-  let statusObj = {
-    success: true,
-    error: false,
-    date: start
-  };
   cw.getMetricData(params, (err, data) => {
     if (err) {
       console.log(`There was an error getting the CloudFront metrics.\n${err}`);
