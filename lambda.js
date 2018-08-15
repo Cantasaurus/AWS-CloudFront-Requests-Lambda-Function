@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 //Lambda does support env variables surprisingly, maybe not surprisingly actually :D.
 //https://docs.aws.amazon.com/lambda/latest/dg/env_variables.html
 const emailPassword = process.env.EMAIL_PASSWORD;
+const email = process.env.EMAIL;
 const accessKeyId = process.env.AWS_CLIENT;
 const secretAccessKey = process.env.AWS_SECRET;
 const region = "us-east-1";
@@ -68,7 +69,7 @@ var params = {
 var transporter = nodemailer.createTransport({
  service: 'gmail',
  auth: {
-        user: 'dannycanter123@gmail.com',
+        user: email,
         pass: emailPassword
     }
 });
@@ -80,8 +81,8 @@ function metrics(){
       console.log(`There was an error getting the CloudFront metrics.\n${err}`);
       //Simply change the from, to, subject, and html to your liking. My needs are fairly simple.
       const mailOptions = {
-        from: 'dannycanter123@gmail.com',
-        to: 'dannycanter123@gmail.com',
+        from: email,
+        to: email,
         subject: `CloudFront requests for ${startString}`,
         html: `<p>There was an error getting the CloudFront requests for <i>${startString}</i>.</p>`
       };
@@ -102,8 +103,8 @@ function metrics(){
         amount = 0;
       }
       const mailOptions = {
-        from: 'dannycanter123@gmail.com',
-        to: 'dannycanter123@gmail.com',
+        from: email,
+        to: email,
         subject: `CloudFront requests for ${startString}`,
         html: `<p>The CloudFront requests for <i>${startString}</i> are: <b>${amount}</b></p>`
       };
